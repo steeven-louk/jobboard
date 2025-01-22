@@ -10,4 +10,4 @@ bodyParser.json();
 const port = 5000 || process.env.PORT
 console.log(process.env.PORT)
 
-app.listen(()=> console.log("serveur est lancer au port", port))
+app.listen(port,()=> console.log("serveur est lancer au port", port));

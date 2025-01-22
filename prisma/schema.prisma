@@ -1,11 +1,107 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "sqlite"  // Ou PostgreSQL, MySQL selon ton choix
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String
+  fullName    String
+  role        UserRole @default(USER)
+  jobs        Job[]    @relation("UserJobs")
+  applications Application[]
+  payments    Payment[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  Subscription Subscription[]
+}
+
+enum UserRole {
+  USER
+  RECRUITER
+  ADMIN
+}
+
+model Job {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  location    String
+  salary      Float?
+  jobType     JobType
+  isPremium   Boolean   @default(false)
+  userId      Int
+  user        User      @relation("UserJobs", fields: [userId], references: [id])
+  applications Application[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
+}
+
+model Application {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  jobId       Int
+  coverLetter String?
+  status      ApplicationStatus @default(PENDING)
+  user        User      @relation(fields: [userId], references: [id])
+  job         Job       @relation(fields: [jobId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  plan        SubscriptionPlan
+  startDate   DateTime
+  endDate     DateTime
+  status      SubscriptionStatus @default(ACTIVE)
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+enum SubscriptionPlan {
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model Payment {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  amount      Float
+  status      PaymentStatus @default(PENDING)
+  paymentDate DateTime      @default(now())
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }

@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const verifyToken =async(req,res,next)=>{
-    const token = req.headers['Authorization'];
+    const token = req.headers['authorization'];
 
     if(!token) return res.status(403).json({error:'Acces refuser'});
 

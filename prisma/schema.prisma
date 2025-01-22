@@ -49,7 +49,11 @@ enum JobType {
   PART_TIME
   CONTRACT
   FREELANCE
-  INTERNSHIP
+  CDI
+  CDD
+  STAGE
+  INTERIM
+  
 }
 
 model Application {

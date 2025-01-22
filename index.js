@@ -1,13 +1,18 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
+const Auth_routes = require("./routes/Auth_routes");
 require('dotenv').config()
 
 
 
 const app = express()
-bodyParser.json();
-const port = 5000 || process.env.PORT
-console.log(process.env.PORT)
+app.use(express.json());
+app.use(bodyParser.json()); 
+app.use(cors())
 
-app.listen(port,()=> console.log("serveur est lancer au port", port));
+app.use('/api/auth',Auth_routes);
+const port = process.env.PORT || 5000;
+
+app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`))
+   .on('error', (err) => console.error("Erreur lors du démarrage du serveur:", err));

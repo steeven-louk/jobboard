@@ -13,6 +13,12 @@ model User {
   password    String
   fullName    String
   role        UserRole @default(USER)
+  sexe        Sexe @default(Homme)
+  phone       String
+  city        String
+  domaine     String?
+  picture     String
+  birthdate   DateTime
   jobs        Job[]    @relation("UserJobs")
   applications Application[]
   payments    Payment[]
@@ -20,6 +26,45 @@ model User {
   updatedAt   DateTime @updatedAt
 
   Subscription Subscription[]
+
+  Experience Experience[] @relation("UserJobs")
+
+  Diplome Formation[] @relation("UserJobs")
+
+  Favoris Favoris[]
+}
+
+model Experience {
+  id            Int   @id @default(autoincrement())
+  title         String
+  entreprise    String
+  location      String
+  contract      JobType
+  date          String
+  en_cours      Boolean @default(false)
+  description   String?
+  competence    String?
+  userId        Int
+  user          User      @relation("UserJobs", fields: [userId], references: [id])
+}
+
+model Formation {
+  id            Int   @id @default(autoincrement())
+  title         String
+  level         String
+  school        String
+  location      String
+  date          String
+  description   String?
+  competence    String?
+  userId        Int
+  user          User      @relation("UserJobs", fields: [userId], references: [id])
+
+}
+
+enum Sexe {
+  Homme
+  Femme
 }
 
 enum UserRole {
@@ -32,17 +77,32 @@ model Job {
   id          Int       @id @default(autoincrement())
   title       String
   description String
+  skill       String
+  requirement String
   location    String
   salary      Float?
+  duration    String?
   jobType     JobType
   isPremium   Boolean   @default(false)
   userId      Int
   user        User      @relation("UserJobs", fields: [userId], references: [id])
   applications Application[]
+  expiration_date  DateTime
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  Favoris Favoris[]
 }
 
+model Favoris {
+  id            Int   @id @default(autoincrement())
+  userId        Int
+  jobId         Int
+  user          User      @relation(fields: [userId], references: [id])
+  job           Job       @relation(fields: [jobId], references: [id])  
+  createdAt   DateTime  @default(now())
+
+}
 
 enum JobType {
   FULL_TIME
@@ -61,6 +121,7 @@ model Application {
   userId      Int
   jobId       Int
   coverLetter String?
+  cv_url          String
   status      ApplicationStatus @default(PENDING)
   user        User      @relation(fields: [userId], references: [id])
   job         Job       @relation(fields: [jobId], references: [id])

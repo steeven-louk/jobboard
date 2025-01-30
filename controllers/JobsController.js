@@ -7,6 +7,22 @@ const getJobs =async(_,res) =>{
     return res.status(200).json({jobs:jobs});
 }
 
+const getJob =async(req,res) =>{
+    const {id} = req.params
+    try {
+        const jobs = await prisma.job.findUnique({
+            where: {id:parseInt(id)}
+        });
+        if(!jobs){
+            return res.status(404).json({message:"Erreur lors de la recuperation du job"});
+        }
+        return res.status(200).json({jobs:jobs});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error:error});
+    }
+}
+
 const addJob = async(req,res)=>{
     const {title,
         description,
@@ -80,4 +96,4 @@ const deleteJobs = async(req,res)=>{
     }
 }
 
-module.exports = {getJobs,addJob,updateJob,deleteJobs};
+module.exports = {getJobs,getJob,addJob,updateJob,deleteJobs};

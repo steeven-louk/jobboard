@@ -126,6 +126,9 @@ model Application {
   user        User      @relation(fields: [userId], references: [id])
   job         Job       @relation(fields: [jobId], references: [id])
   createdAt   DateTime  @default(now())
+  // @@id(name: "applicationId", [userId,jobId])
+  @@unique([userId,jobId])
+  
 }
 
 enum ApplicationStatus {

@@ -11,7 +11,10 @@ const getJob =async(req,res) =>{
     const {id} = req.params
     try {
         const jobs = await prisma.job.findUnique({
-            where: {id:parseInt(id)}
+            where: {id:parseInt(id)},
+            include:{
+                user:true
+            }
         });
         if(!jobs){
             return res.status(404).json({message:"Erreur lors de la recuperation du job"});

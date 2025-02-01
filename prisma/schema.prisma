@@ -101,6 +101,7 @@ model Favoris {
   user          User      @relation(fields: [userId], references: [id])
   job           Job       @relation(fields: [jobId], references: [id])  
   createdAt   DateTime  @default(now())
+  @@unique([userId,jobId])
 
 }
 

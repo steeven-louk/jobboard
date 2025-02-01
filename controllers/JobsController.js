@@ -96,7 +96,50 @@ const deleteJobs = async(req,res)=>{
         return res.status(200).json({message:"le job a été supprimer avec succes",job});
     } catch (error) {
         console.log(error)
+        return res.status(500).json({error:error});
     }
 }
 
-module.exports = {getJobs,getJob,addJob,updateJob,deleteJobs};
+
+const addToFavorie = async(req,res)=>{
+    const {jobId} = req.params;
+
+    try {
+        if (!jobId) {
+            return res.status(400).json({ message: "L'identifiant de l'offre d'emploi est requis." });
+        }
+
+                // Vérifier si l'utilisateur a déjà postulé
+                const isExist = await prisma.favoris.findUnique({
+                    where: {
+                        userId_jobId:{jobId:parseInt(jobId), userId:1}     
+                    },
+                });
+        
+                if (isExist) {
+                    await prisma.favoris.delete({
+                        where: {
+                        userId_jobId:{jobId:parseInt(jobId), userId:1}     
+                    },
+                    });
+                    return res.status(200).json({ message: "Offre supprimer des favoris" });
+                }
+                    await prisma.favoris.create({
+                    // where: {
+                    //     userId_jobId:{jobId:parseInt(jobId), userId:1}     
+                    // },
+                    data:{
+                        userId:req.user.id,
+                        jobId:parseInt(jobId),
+                    }
+                });
+                return res.status(201).json({
+                    message: "Offre ajouter en favoris"
+                });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({error:error});
+    }
+}
+
+module.exports = {getJobs,getJob,addJob,updateJob,deleteJobs, addToFavorie};

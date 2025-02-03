@@ -101,45 +101,79 @@ const deleteJobs = async(req,res)=>{
 }
 
 
-const addToFavorie = async(req,res)=>{
-    const {jobId} = req.params;
+const addToFavorie = async (req, res) => {
+    const { jobId } = req.params;
+
+    if (!req.user) {
+        return res.status(401).json({ message: "Utilisateur non authentifié" });
+    }
 
     try {
         if (!jobId) {
             return res.status(400).json({ message: "L'identifiant de l'offre d'emploi est requis." });
         }
 
-                // Vérifier si l'utilisateur a déjà postulé
-                const isExist = await prisma.favoris.findUnique({
-                    where: {
-                        userId_jobId:{jobId:parseInt(jobId), userId:1}     
-                    },
-                });
-        
-                if (isExist) {
-                    await prisma.favoris.delete({
-                        where: {
-                        userId_jobId:{jobId:parseInt(jobId), userId:1}     
-                    },
-                    });
-                    return res.status(200).json({ message: "Offre supprimer des favoris" });
+        // Vérifier si l'offre est déjà en favoris
+        const isExist = await prisma.favoris.findUnique({
+            where: {
+                userId_jobId: {
+                    jobId: parseInt(jobId),
+                    userId: req.user.id
                 }
-                    await prisma.favoris.create({
-                    // where: {
-                    //     userId_jobId:{jobId:parseInt(jobId), userId:1}     
-                    // },
-                    data:{
-                        userId:req.user.id,
-                        jobId:parseInt(jobId),
+            }
+        });
+
+        if (isExist) {
+            await prisma.favoris.delete({
+                where: {
+                    userId_jobId: {
+                        jobId: parseInt(jobId),
+                        userId: req.user.id
                     }
-                });
-                return res.status(201).json({
-                    message: "Offre ajouter en favoris"
-                });
+                }
+            });
+            return res.status(200).json({ message: "Offre supprimée des favoris" });
+        }
+
+        await prisma.favoris.create({
+            data: {
+                userId: req.user.id,
+                jobId: parseInt(jobId),
+            }
+        });
+
+        return res.status(201).json({ message: "Offre ajoutée aux favoris" });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({error:error});
+        console.error("Erreur serveur :", error);
+        return res.status(500).json({ error: "Erreur serveur" });
+    }
+};
+
+
+const getFavoris = async (req, res) => {
+    // const { userId } = await req.params;
+    if (!req.user) {
+        return res.status(401).json({ message: "Utilisateur non authentifié" });
+    }
+    try {
+        const isExist = await prisma.user.findUnique({
+            where: {id: req.user.id}
+        });
+
+        if (!isExist) {
+            return res.status(200).json({ message: "Utilisateur non authentifié"  });
+        }
+        const favoris = await prisma.favoris.findMany({
+            where:{userId:req.user.id},
+            include: {
+    job: true,
+  },
+        });
+        return res.status(200).json({favoris});
+    } catch (error) {
+        console.error("Erreur serveur :", error);
+        return res.status(500).json({ error: "Erreur serveur" });
     }
 }
 
-module.exports = {getJobs,getJob,addJob,updateJob,deleteJobs, addToFavorie};
+module.exports = {getJobs,getJob,addJob,updateJob,deleteJobs, addToFavorie, getFavoris};

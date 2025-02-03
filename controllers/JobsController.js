@@ -166,8 +166,8 @@ const getFavoris = async (req, res) => {
         const favoris = await prisma.favoris.findMany({
             where:{userId:req.user.id},
             include: {
-    job: true,
-  },
+                job: true,
+            },
         });
         return res.status(200).json({favoris});
     } catch (error) {

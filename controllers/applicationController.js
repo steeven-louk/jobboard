@@ -1,6 +1,49 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+
+const getAllApplication = async (req, res) => {
+    try {
+        // Vérification que l'utilisateur est authentifié
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Utilisateur non authentifié" });
+        }
+
+        // Vérifier si l'utilisateur existe dans la base de données
+        const existingUser = await prisma.user.findUnique({
+            where: { id: req.user.id }
+        });
+
+        if (!existingUser) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
+
+        // Récupérer les applications de l'utilisateur
+        const applications = await prisma.application.findMany({
+            where: { userId: existingUser.id },
+            include: {
+                job: true,  // Inclure les détails de l'offre d'emploi
+                user: {      // Inclure les détails de l'utilisateur
+                    select: {
+                        fullName: true,
+                        email: true,
+                        sexe: true,
+                        phone: true,
+                        city:true
+                    }
+                }
+            }
+        });
+
+        return res.status(200).json({ applications });
+    } catch (error) {
+        console.error("Erreur lors de la récupération des applications :", error);
+        return res.status(500).json({ message: "Erreur lors de la récupération des applications", error: error.message });
+    }
+};
+
+
+
 const sumbitApplication = async(req,res)=>{
     const {jobId} = req.params;
     const {coverLetter,cv_url} = req.body
@@ -44,4 +87,4 @@ const sumbitApplication = async(req,res)=>{
     }
 }
 
-module.exports = { sumbitApplication };
+module.exports = { sumbitApplication,getAllApplication };

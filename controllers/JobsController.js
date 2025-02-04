@@ -3,7 +3,11 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient()
 
 const getJobs =async(_,res) =>{
-    const jobs = await prisma.job.findMany({});
+    const jobs = await prisma.job.findMany({
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
     return res.status(200).json({jobs:jobs});
 }
 

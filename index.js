@@ -4,6 +4,7 @@ const cors = require("cors")
 const Auth_routes = require("./routes/Auth_routes");
 const job_Route = require("./routes/Job_routes");
 const application_Route = require("./routes/Application_routes");
+const userRouter = require("./routes/User_routes");
 require('dotenv').config()
 
 
@@ -15,6 +16,7 @@ app.use(cors())
 
 app.use('/api/auth',Auth_routes);
 app.use('/api/user',application_Route);
+app.use('/api/user',userRouter);
 app.use('/api', job_Route);
 const port = process.env.PORT || 5000;
 

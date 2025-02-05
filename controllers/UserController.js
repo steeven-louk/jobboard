@@ -171,7 +171,7 @@ const addExperience =async(req,res)=>{
                 competence, // Assure-toi d'envoyer une chaîne si c'est stocké en texte
             },
         });
-        return res.status(200).json({ message: "Expérience ajouter avec succès", addExperience });
+        return res.status(201).json({ message: "Expérience ajouter avec succès", addExperience });
 
     } catch (error) {
         console.log(error);
@@ -179,4 +179,27 @@ const addExperience =async(req,res)=>{
     }
 }
 
-module.exports= {getProfil, updateProfile, updateExperience, updateDiplome,addExperience}
+const deleteExperience =async(req,res)=>{
+   const {id} = await req.params;
+    try {
+        if(!req.user || !req.user.id){
+            return res.status(401).json({message:"Utilisateur non authentifié"});
+        }
+
+        const isExist = await prisma.experience.findUnique({where: { id: Number(id) }});
+
+        if(!isExist){
+            return res.status(404).json({message:"Experience introuvable"});
+        }
+        await prisma.experience.delete({where: { id: Number(id) }});
+
+        return res.status(200).json({ message: "Expérience supprimer avec succès"});
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({message:"Erreur lors de la suppression de l'experience", error:error})
+    }
+}
+
+
+module.exports= {getProfil, updateProfile, updateExperience, updateDiplome,addExperience,deleteExperience}

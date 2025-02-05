@@ -129,7 +129,7 @@ const updateDiplome =async(req, res)=>{
                 location,
                 date,
                 description,
-                competence// Assure-toi d'envoyer une chaîne si c'est stocké en texte
+                competence
             },
         });
 
@@ -140,4 +140,43 @@ const updateDiplome =async(req, res)=>{
     }
 }
 
-module.exports= {getProfil, updateProfile, updateExperience, updateDiplome}
+const addExperience =async(req,res)=>{
+    const {location,
+        entreprise,
+        title,
+        contract,
+        date,
+        description,
+        en_cours,
+        competence} =await req.body;
+    try {
+        if(!req.user || !req.user.id){
+            return res.status(401).json({message:"Utilisateur non authentifié"});
+        }
+
+        if(!location || !entreprise || !title || !contract || !competence){
+            return res.status(401).json({message:"Tout les champs sont requis"});
+        }
+        const addExperience = await prisma.experience.create({
+            // where: { user: req.user.id },
+            data: {
+                userId:req.user.id,
+                location,
+                entreprise,
+                title,
+                contract,
+                date,
+                description,
+                en_cours,
+                competence, // Assure-toi d'envoyer une chaîne si c'est stocké en texte
+            },
+        });
+        return res.status(200).json({ message: "Expérience ajouter avec succès", addExperience });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({message:"Erreur lors de l'ajout de l'experience", error:error})
+    }
+}
+
+module.exports= {getProfil, updateProfile, updateExperience, updateDiplome,addExperience}

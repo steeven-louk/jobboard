@@ -21,7 +21,7 @@ const getJob = async (req, res) => {
     try {
         const job = await prisma.job.findUnique({
             where: { id: parseInt(id) },
-            include: { user: true }
+            include: { company: true }
         });
 
         if (!job) {
@@ -36,8 +36,8 @@ const getJob = async (req, res) => {
 
 // Ajouter une nouvelle offre d'emploi
 const addJob = async (req, res) => {
-    const { title, description, location, salary, jobType,duration, isPremium,skill, requirement,expiration_date } = req.body;
-
+    const { title, description, location, salary, jobType,duration, isPremium,skill, requirement,expiration_date } = await req.body;
+    const userId = await req.user.id;
     try {
         // Vérifier si l'utilisateur est authentifié
         if (!req.user) {
@@ -45,12 +45,17 @@ const addJob = async (req, res) => {
         }
 
         // Vérifier si l'utilisateur est un recruteur
-        const isRecruter = await prisma.user.findUnique({
-            where: { id: req.user.id, role: "RECRUITER" }
+        const user = await prisma.user.findUnique({
+            where: { id: userId, role: "RECRUITER" },
+            include: {company:true},
         });
 
-        if (!isRecruter) {
-            return res.status(403).json({ message: "Accès refusé : vous n'êtes pas recruteur" });
+        if (!user || user.role !== "RECRUITER") {
+            return res.status(403).json({ message: "Seuls les recruteurs peuvent ajouter des offres." });
+        }
+
+        if(!user.company){
+            return res.status(400).json({message:"Aucune entreprise associé à votre compte."})
         }
 
         // Création de l'offre d'emploi
@@ -58,21 +63,21 @@ const addJob = async (req, res) => {
             data: {
                 title,
                 description,
-                location,
-                salary,
-                jobType,
-                isPremium,
                 skill,
                 requirement,
+                location,
+                salary,
                 duration,
-                expiration_date: "2025-08-15T00:00:00.000Z",
-                userId: req.user.id
-            }
+                jobType,
+                expiration_date: new Date(expiration_date),
+                userId,
+                companyId: user.company.id, // Associer l'offre à l'entreprise du recruteur
+            },
         });
 
-        return res.status(201).json({ message: "Annonce créée avec succès", createJob });
+        return res.status(201).json({ message: "Offre d'emploi ajoutée avec succès.", createJob });
     } catch (error) {
-        console.error("Erreur lors de la création du job :", error);
+        console.error("Erreur lors de l'ajout de l'offre.", error);
         return res.status(500).json({ error: "Erreur serveur" });
     }
 };

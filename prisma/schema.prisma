@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
+  id          String      @id @default(cuid())
   email       String   @unique
   password    String
   fullName    String
@@ -42,7 +42,7 @@ model Experience {
   en_cours      Boolean @default(false)
   description   String?
   competence    String?
-  userId        Int
+  userId        String
   user          User      @relation("UserJobs", fields: [userId], references: [id])
 }
 
@@ -55,7 +55,7 @@ model Formation {
   date          String
   description   String?
   competence    String?
-  userId        Int
+  userId        String
   user          User      @relation("UserJobs", fields: [userId], references: [id])
 
 }
@@ -82,7 +82,7 @@ model Job {
   duration    String?
   jobType     JobType
   isPremium   Boolean   @default(false)
-  userId      Int
+  userId      String
   companyId   Int       // Ajout de l'entreprise
   user        User      @relation("UserJobs", fields: [userId], references: [id])
   company     Company   @relation(fields: [companyId], references: [id])
@@ -102,7 +102,7 @@ model Company {
   location    String
   website     String?
   logo        String?
-  userId      Int    @unique
+  userId      String    @unique
   user        User   @relation(fields: [userId], references: [id])
 
   jobs        Job[]
@@ -112,7 +112,7 @@ model Company {
 
 model Favoris {
   id            Int   @id @default(autoincrement())
-  userId        Int
+  userId        String
   jobId         Int
   user          User      @relation(fields: [userId], references: [id])
   job           Job       @relation(fields: [jobId], references: [id])  
@@ -135,7 +135,7 @@ enum JobType {
 
 model Application {
   id          Int       @id @default(autoincrement())
-  userId      Int
+  userId      String
   jobId       Int
   coverLetter String?
   cv_url          String
@@ -156,7 +156,7 @@ enum ApplicationStatus {
 
 model Subscription {
   id          Int       @id @default(autoincrement())
-  userId      Int
+  userId      String
   plan        SubscriptionPlan
   startDate   DateTime
   endDate     DateTime
@@ -178,7 +178,7 @@ enum SubscriptionStatus {
 
 model Payment {
   id          Int       @id @default(autoincrement())
-  userId      Int
+  userId      String
   amount      Float
   status      PaymentStatus @default(PENDING)
   paymentDate DateTime      @default(now())

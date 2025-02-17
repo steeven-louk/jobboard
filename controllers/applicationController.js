@@ -62,28 +62,42 @@ const sumbitApplication = async(req,res)=>{
         // Vérifier si l'utilisateur a déjà postulé
         const isExist = await prisma.application.findUnique({
             where: {
-                userId_jobId:{jobId:parseInt(jobId), userId:1}     
+                userId_jobId:{jobId:parseInt(jobId), userId:req.user.id}     
             },
         });
 
         if (isExist) {
             return res.status(200).json({ message: "Vous avez déjà postulé à cette offre." });
+        }else{
+            const applyJob = await prisma.application.create({
+                data:{
+                    userId:req.user.id,
+                    jobId:parseInt(jobId),
+                    coverLetter,
+                    cv_url
+                }
+            });
+            return res.status(201).json({
+                message: "Votre candidature a été envoyée avec succès.",
+                applyJob,
+            });
         }
-        const applyJob = await prisma.application.create({
-            data:{
-                userId:req.user.id,
-                jobId:parseInt(jobId),
-                coverLetter,
-                cv_url
-            }
-        });
-        return res.status(201).json({
-            message: "Votre candidature a été envoyée avec succès.",
-            applyJob,
-        });
+        
+        // const applyJob = await prisma.application.create({
+        //     data:{
+        //         userId:req.user.id,
+        //         jobId:parseInt(jobId),
+        //         coverLetter,
+        //         cv_url
+        //     }
+        // });
+        // return res.status(201).json({
+        //     message: "Votre candidature a été envoyée avec succès.",
+        //     applyJob,
+        // });
     } catch (error) {
         console.error("Erreur lors de l'envoi de la candidature :", error);
-        return res.status(500).json({ erreur: "Erreur serveur" });
+        return res.status(500).json({ erreur: "Erreur serveur" ,error:error});
     }
 }
 

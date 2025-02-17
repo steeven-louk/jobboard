@@ -140,6 +140,65 @@ const updateDiplome =async(req, res)=>{
     }
 }
 
+const addDiplome =async(req,res)=>{
+    const {title,
+        level,
+        school,
+        location,
+        date,
+        description,
+        competence} =await req.body;
+    try {
+        if(!req.user || !req.user.id){
+            return res.status(401).json({message:"Utilisateur non authentifié"});
+        }
+
+        if(!location || !level || !title || !school || !competence){
+            return res.status(401).json({message:"Tout les champs sont requis"});
+        }
+        const diplome = await prisma.formation.create({
+            // where: { user: req.user.id },
+            data: {
+                userId:req.user.id,
+                title,
+                level,
+                school,
+                location,
+                date,
+                description,
+                competence // Assure-toi d'envoyer une chaîne si c'est stocké en texte
+            },
+        });
+        return res.status(201).json({ message: "Diplome ajouter avec succès", diplome });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({message:"Erreur lors de l'ajout du diplome", error:error})
+    }
+}
+
+const deleteDiplome =async(req,res)=>{
+    const {id} = await req.params;
+     try {
+         if(!req.user || !req.user.id){
+             return res.status(401).json({message:"Utilisateur non authentifié"});
+         }
+ 
+         const isExist = await prisma.formation.findUnique({where: { id: Number(id) }});
+ 
+         if(!isExist){
+             return res.status(404).json({message:"Formation introuvable"});
+         }
+         await prisma.formation.delete({where: { id: Number(isExist.id) }});
+ 
+         return res.status(200).json({ message: "Formation supprimer avec succès"});
+ 
+     } catch (error) {
+         console.log("Error lors de la suppression de la formation", error);
+         return res.status(500).json({message:"Erreur lors de la suppression de la formation", error:error})
+     }
+ }
+
 const addExperience =async(req,res)=>{
     const {location,
         entreprise,
@@ -191,7 +250,7 @@ const deleteExperience =async(req,res)=>{
         if(!isExist){
             return res.status(404).json({message:"Experience introuvable"});
         }
-        await prisma.experience.delete({where: { id: Number(id) }});
+        await prisma.experience.delete({where: { id: Number(isExist.id) }});
 
         return res.status(200).json({ message: "Expérience supprimer avec succès"});
 
@@ -202,4 +261,12 @@ const deleteExperience =async(req,res)=>{
 }
 
 
-module.exports= {getProfil, updateProfile, updateExperience, updateDiplome,addExperience,deleteExperience}
+module.exports= {getProfil,
+     updateProfile,
+     updateExperience, 
+     updateDiplome,
+     addExperience,
+     deleteExperience,
+     addDiplome,
+     deleteDiplome
+    }

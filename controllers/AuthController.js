@@ -5,11 +5,11 @@ const jwt = require("jsonwebtoken");
 const prisma = new PrismaClient();
 
 const Register = async (req, res) => {
-    const { email, password, fullName } = req.body;
+    const { email, password, fullName, phone, city } = req.body;
     const saltRounds = 10;
 
     try {
-        if (!email || !password || !fullName) {
+        if (!email || !password || !fullName || !phone || !city) {
             return res.status(400).json({ message: "Tous les champs sont requis" });
         }
 
@@ -28,13 +28,17 @@ const Register = async (req, res) => {
                 fullName,
                 email,
                 password: hashedPassword,
+                phone,
+                city,
+                picture:"lorem",
+                birthdate:"1999-08-15T00:00:00.000Z"
             }
         });
 
         return res.status(201).json({ message: "Utilisateur créé avec succès", user: newUser });
     } catch (error) {
         console.error("Erreur lors de l'inscription:", error);
-        return res.status(500).json({ message: "Erreur interne du serveur" });
+        return res.status(500).json({ message: "Erreur interne du serveur", error:error });
     }
 }
 

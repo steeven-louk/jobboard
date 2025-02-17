@@ -1,110 +1,116 @@
 const { PrismaClient } = require("@prisma/client");
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-const getJobs =async(_,res) =>{
-    const jobs = await prisma.job.findMany({
-        orderBy: {
-            createdAt: 'desc'
-        }
-    });
-    return res.status(200).json({jobs:jobs});
-}
-
-const getJob =async(req,res) =>{
-    const {id} = req.params
+// Récupérer toutes les offres d'emploi
+const getJobs = async (_, res) => {
     try {
-        const jobs = await prisma.job.findUnique({
-            where: {id:parseInt(id)},
-            include:{
-                user:true
-            }
+        const jobs = await prisma.job.findMany({
+            orderBy: { createdAt: 'desc' }
         });
-        if(!jobs){
-            return res.status(404).json({message:"Erreur lors de la recuperation du job"});
-        }
-        return res.status(200).json({jobs:jobs});
+        return res.status(200).json({ jobs:jobs });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({error:error});
+        console.error("Erreur lors de la récupération des jobs :", error);
+        return res.status(500).json({ error: "Erreur serveur" });
     }
-}
+};
 
-const addJob = async(req,res)=>{
-    const {title,
-        description,
-        location,
-        salary,
-        jobType,
-        isPremium,
-        } = req.body
-
-    try {
-        const createJob = await prisma.job.create({
-            data:{
-                title,
-                description,
-                location,
-                salary,
-                jobType,
-                isPremium,
-                userId:req.user.id
-            }
-        });
-        return res.status(201).json({message:"l'annonce a été creer avec succes", createJob});
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({erreur:"errer server"})
-    }
-}
-
-
-const updateJob = async(req,res) => {
+// Récupérer une offre d'emploi spécifique
+const getJob = async (req, res) => {
     const { id } = req.params;
-    const {title,
-        description,
-        location,
-        salary,
-        jobType,
-        isPremium,
-        } = req.body
+    try {
+        const job = await prisma.job.findUnique({
+            where: { id: parseInt(id) },
+            include: { user: true }
+        });
+
+        if (!job) {
+            return res.status(404).json({ message: "Job non trouvé" });
+        }
+        return res.status(200).json({ jobs:job });
+    } catch (error) {
+        console.error("Erreur lors de la récupération du job :", error);
+        return res.status(500).json({ error: "Erreur serveur" });
+    }
+};
+
+// Ajouter une nouvelle offre d'emploi
+const addJob = async (req, res) => {
+    const { title, description, location, salary, jobType,duration, isPremium,skill, requirement,expiration_date } = req.body;
 
     try {
-        const update = await prisma.job.update({
-            where:{id:parseInt(id)},
-            data:{
+        // Vérifier si l'utilisateur est authentifié
+        if (!req.user) {
+            return res.status(401).json({ message: "Vous n'êtes pas authentifié" });
+        }
+
+        // Vérifier si l'utilisateur est un recruteur
+        const isRecruter = await prisma.user.findUnique({
+            where: { id: req.user.id, role: "RECRUITER" }
+        });
+
+        if (!isRecruter) {
+            return res.status(403).json({ message: "Accès refusé : vous n'êtes pas recruteur" });
+        }
+
+        // Création de l'offre d'emploi
+        const createJob = await prisma.job.create({
+            data: {
                 title,
                 description,
                 location,
                 salary,
                 jobType,
                 isPremium,
+                skill,
+                requirement,
+                duration,
+                expiration_date: "2025-08-15T00:00:00.000Z",
+                userId: req.user.id
             }
         });
-        return res.status(201).json({message:"l'annonce a été modifier avec succes", update});
 
-
+        return res.status(201).json({ message: "Annonce créée avec succès", createJob });
     } catch (error) {
-        console.log(error);
-        return req.status(409).json(error);
+        console.error("Erreur lors de la création du job :", error);
+        return res.status(500).json({ error: "Erreur serveur" });
     }
-}
+};
 
-const deleteJobs = async(req,res)=>{
-    const {id} = req.params;
+// Modifier une offre d'emploi
+const updateJob = async (req, res) => {
+    const { id } = req.params;
+    const { title, description, location, salary, jobType, isPremium } = req.body;
+
+    try {
+        const updatedJob = await prisma.job.update({
+            where: { id: parseInt(id) },
+            data: { title, description, location, salary, jobType, isPremium }
+        });
+
+        return res.status(200).json({ message: "Annonce modifiée avec succès", updatedJob });
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du job :", error);
+        return res.status(409).json({ error: "Impossible de modifier cette annonce" });
+    }
+};
+
+// Supprimer une offre d'emploi
+const deleteJobs = async (req, res) => {
+    const { id } = req.params;
     try {
         const job = await prisma.job.delete({
-            where:{id:id}
+            where: { id: parseInt(id) }
         });
-        await getJobs();
-        return res.status(200).json({message:"le job a été supprimer avec succes",job});
+
+        return res.status(200).json({ message: "Le job a été supprimé avec succès", job });
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({error:error});
+        console.error("Erreur lors de la suppression du job :", error);
+        return res.status(500).json({ error: "Erreur serveur" });
     }
-}
+};
 
-
+// Ajouter ou retirer un job des favoris
 const addToFavorie = async (req, res) => {
     const { jobId } = req.params;
 
@@ -113,15 +119,13 @@ const addToFavorie = async (req, res) => {
     }
 
     try {
-        if (!jobId) {
-            return res.status(400).json({ message: "L'identifiant de l'offre d'emploi est requis." });
-        }
+        const jobIdInt = parseInt(jobId);
 
         // Vérifier si l'offre est déjà en favoris
         const isExist = await prisma.favoris.findUnique({
             where: {
                 userId_jobId: {
-                    jobId: parseInt(jobId),
+                    jobId: jobIdInt,
                     userId: req.user.id
                 }
             }
@@ -131,7 +135,7 @@ const addToFavorie = async (req, res) => {
             await prisma.favoris.delete({
                 where: {
                     userId_jobId: {
-                        jobId: parseInt(jobId),
+                        jobId: jobIdInt,
                         userId: req.user.id
                     }
                 }
@@ -142,7 +146,7 @@ const addToFavorie = async (req, res) => {
         await prisma.favoris.create({
             data: {
                 userId: req.user.id,
-                jobId: parseInt(jobId),
+                jobId: jobIdInt,
             }
         });
 
@@ -153,31 +157,23 @@ const addToFavorie = async (req, res) => {
     }
 };
 
-
+// Récupérer les offres d'emploi favorites de l'utilisateur
 const getFavoris = async (req, res) => {
-    // const { userId } = await req.params;
     if (!req.user) {
         return res.status(401).json({ message: "Utilisateur non authentifié" });
     }
+
     try {
-        const isExist = await prisma.user.findUnique({
-            where: {id: req.user.id}
+        const favoris = await prisma.favoris.findMany({
+            where: { userId: req.user.id },
+            include: { job: true },
         });
 
-        if (!isExist) {
-            return res.status(200).json({ message: "Utilisateur non authentifié"  });
-        }
-        const favoris = await prisma.favoris.findMany({
-            where:{userId:req.user.id},
-            include: {
-                job: true,
-            },
-        });
-        return res.status(200).json({favoris});
+        return res.status(200).json({ favoris });
     } catch (error) {
-        console.error("Erreur serveur :", error);
+        console.error("Erreur lors de la récupération des favoris :", error);
         return res.status(500).json({ error: "Erreur serveur" });
     }
-}
+};
 
-module.exports = {getJobs,getJob,addJob,updateJob,deleteJobs, addToFavorie, getFavoris};
+module.exports = { getJobs, getJob, addJob, updateJob, deleteJobs, addToFavorie, getFavoris };

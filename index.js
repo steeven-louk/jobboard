@@ -6,6 +6,7 @@ const job_Route = require("./routes/Job_routes");
 const application_Route = require("./routes/Application_routes");
 const userRouter = require("./routes/User_routes");
 const recruterRoute = require("./routes/RecruiterRoutes");
+const company_router = require("./routes/Company_routes");
 require('dotenv').config()
 
 
@@ -20,6 +21,7 @@ app.use('/api/user',application_Route);
 app.use('/api/user',userRouter);
 app.use('/api/auth',recruterRoute);
 app.use('/api', job_Route);
+app.use('/api/company', company_router);
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`))

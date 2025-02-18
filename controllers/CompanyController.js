@@ -1,0 +1,143 @@
+const { PrismaClient } = require("@prisma/client");
+
+const prisma = new PrismaClient();
+
+const getCompanyJobs = async (req, res) => {
+    const {companyId} = await req.params;
+    try {
+      const userId = await req.user.id; // ID du recruteur connecté
+  
+      // Vérifier si l'utilisateur est un recruteur
+      const user = await prisma.user.findUnique({
+        where: { id: userId, role:"RECRUITER" },
+        include: { company: true },
+      });
+
+      const company = await prisma.company.findUnique({
+        where: {id: parseInt(companyId)}
+      });
+  
+      if (!user || user.role !== "RECRUITER") {
+        return res.status(403).json({ message: "Seuls les recruteurs peuvent voir leurs offres." });
+      }
+      if (!company) {
+        return res.status(404).json({ message: "Company introuvable" });
+      }
+  
+      // Récupérer les offres publiées par ce recruteur
+      const jobs = await prisma.job.findMany({
+        where: { companyId:parseInt(companyId) }
+        // include: {
+        //   applications: true, // Inclure les candidatures reçues pour chaque offre
+        //   company:true
+        // },
+      });
+  
+      return res.status(200).json({jobs});
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Erreur lors de la récupération des offres." });
+    }
+  };
+
+  const getApplyJobs = async (req, res) => {
+    const {companyId} = await req.params;
+    try {
+      const userId = await req.user.id; // ID du recruteur connecté
+  
+      // Vérifier si l'utilisateur est un recruteur
+      const user = await prisma.user.findUnique({
+        where: { id: userId, role:"RECRUITER" },
+        include: { company: true },
+      });
+
+      const company = await prisma.company.findUnique({
+        where: {id: parseInt(companyId)}
+      });
+  
+      if (!user || user.role !== "RECRUITER") {
+        return res.status(403).json({ message: "Seuls les recruteurs peuvent voir leurs offres." });
+      }
+      if (!company) {
+        return res.status(404).json({ message: "Company introuvable" });
+      }
+  
+      // Récupérer les offres publiées par ce recruteur
+      const applyJobs = await prisma.job.findMany({
+        where: { companyId:parseInt(companyId) },
+        select:{id:true,title:true,applications:{
+            select:{
+
+                id:true,
+                status:true,
+                cv_url:true,
+                coverLetter:true,
+                createdAt:true,
+                user:{
+                    select:{
+                        id:true,
+                        fullName:true,
+                        email:true,
+                        phone:true,
+                        picture:true
+                    }
+                }
+            }
+        }},
+      });
+  
+      return res.status(200).json({applyJobs});
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Erreur lors de la récupération des offres." });
+    }
+  };
+
+  const updateApplicationStatus = async (req, res) => {
+    const {companyId, applicationId} = await req.params;
+    const {status} = await req.body;
+    try {
+      const userId = await req.user.id; // ID du recruteur connecté
+  
+      // Vérifier si l'utilisateur est un recruteur
+      const user = await prisma.user.findUnique({
+        where: { id: userId, role:"RECRUITER" },
+        include: { company: true },
+      });
+
+      const company = await prisma.company.findUnique({
+        where: {id: parseInt(companyId)}
+      });
+      const application = await prisma.application.findUnique({
+        where: {id: parseInt(applicationId)}
+      });
+  
+      if (!user || user.role !== "RECRUITER") {
+        return res.status(403).json({ message: "Seuls les recruteurs peuvent voir leurs offres." });
+      }
+      if (!company) {
+        return res.status(404).json({ message: "Company introuvable" });
+      }
+      if (!application) {
+        return res.status(404).json({ message: "application introuvable" });
+      }
+  
+      // Récupérer les offres publiées par ce recruteur
+      const applicationStatus = await prisma.application.update({
+        where: { id:application.id },
+        data:{
+            status
+        },
+        select:{status:true}
+      });
+  
+      return res.status(200).json({applicationStatus});
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Erreur lors de la modification du status." });
+    }
+  };
+  
+  
+  module.exports = { getCompanyJobs, getApplyJobs, updateApplicationStatus };
+  

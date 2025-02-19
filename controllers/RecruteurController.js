@@ -8,11 +8,13 @@ const createRecruiter = async (req, res) => {
     const { 
       email, password, fullName, phone, city, birthdate, 
       companyName, companyLocation, website, description 
-    } = await req.body;
+    } = req.body;
 
-    if (!companyName || !companyLocation) {
-      return res.status(400).json({ message: "Le nom et la localisation de l'entreprise sont obligatoires." });
+    // Vérifier si tous les champs obligatoires sont remplis
+    if (!email || !password || !fullName || !phone || !city || !birthdate || !companyName || !companyLocation) {
+      return res.status(400).json({ message: "Tous les champs sont obligatoires." });
     }
+
 
 
     // Vérifier si l'utilisateur existe déjà
@@ -36,7 +38,7 @@ const createRecruiter = async (req, res) => {
         fullName,
         phone,
         city,
-        birthdate: new Date(birthdate),
+        birthdate: birthdate? new Date(birthdate): null,
         role: "RECRUITER", 
 
         // Vérification et création de l'entreprise

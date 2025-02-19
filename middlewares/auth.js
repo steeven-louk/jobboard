@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require("@prisma/client");
 
+const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // const verifyToken =async(req,res,next)=>{
@@ -18,7 +20,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // }
 // const jwt = require("jsonwebtoken");
 
-const verifyToken = (req, res, next) => {
+const verifyToken = async(req, res, next) => {
     const token = req.headers.authorization;
 
     if (!token) {
@@ -28,13 +30,26 @@ const verifyToken = (req, res, next) => {
     try {
         const decoded = jwt.decode(token.split(" ")[1], process.env.JWT_SECRET);
         req.user = decoded; // Attache l'utilisateur à req.user
+
+          // Si l'utilisateur est un recruteur, récupérer l'ID de sa company
+    if (req.user.role === "RECRUITER") {
+        const recruiter = await prisma.user.findUnique({
+          where: { id: decoded.id },
+          select: { company:{select:{id:true}}}, // Récupère uniquement l'ID de la company
+        });
+  
+        if (recruiter) {
+          req.user.companyId = recruiter.company.id;
+        }
+      }
+  
         next();
     } catch (error) {
         return res.status(403).json({ message: "Token invalide" });
     }
 };
 
-module.exports = verifyToken;
+// module.exports = verifyToken;
 
 
 const verifyRole =(roles)=>{

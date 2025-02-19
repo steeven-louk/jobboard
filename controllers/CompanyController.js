@@ -3,7 +3,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const getCompanyJobs = async (req, res) => {
-    const {companyId} = await req.params;
+    const companyId = await req.user.companyId;
+    // console.log("rre", req.user.companyId)
     try {
       const userId = await req.user.id; // ID du recruteur connecté
   
@@ -14,7 +15,7 @@ const getCompanyJobs = async (req, res) => {
       });
 
       const company = await prisma.company.findUnique({
-        where: {id: parseInt(companyId)}
+        where: {id:companyId }
       });
   
       if (!user || user.role !== "RECRUITER") {
@@ -26,7 +27,7 @@ const getCompanyJobs = async (req, res) => {
   
       // Récupérer les offres publiées par ce recruteur
       const jobs = await prisma.job.findMany({
-        where: { companyId:parseInt(companyId) }
+        where: { companyId:companyId }
         // include: {
         //   applications: true, // Inclure les candidatures reçues pour chaque offre
         //   company:true
@@ -41,7 +42,9 @@ const getCompanyJobs = async (req, res) => {
   };
 
   const getApplyJobs = async (req, res) => {
-    const {companyId} = await req.params;
+    // const {companyId} = await req.params;
+    const companyId = await req.user.companyId;
+
     try {
       const userId = await req.user.id; // ID du recruteur connecté
   
@@ -52,7 +55,7 @@ const getCompanyJobs = async (req, res) => {
       });
 
       const company = await prisma.company.findUnique({
-        where: {id: parseInt(companyId)}
+        where: {id: companyId}
       });
   
       if (!user || user.role !== "RECRUITER") {
@@ -64,7 +67,7 @@ const getCompanyJobs = async (req, res) => {
   
       // Récupérer les offres publiées par ce recruteur
       const applyJobs = await prisma.job.findMany({
-        where: { companyId:parseInt(companyId) },
+        where: { companyId:companyId },
         select:{id:true,title:true,applications:{
             select:{
 
@@ -94,8 +97,10 @@ const getCompanyJobs = async (req, res) => {
   };
 
   const updateApplicationStatus = async (req, res) => {
-    const {companyId, applicationId} = await req.params;
+    const {applicationId} = await req.params;
     const {status} = await req.body;
+    const companyId = await req.user.companyId;
+
     try {
       const userId = await req.user.id; // ID du recruteur connecté
   
@@ -106,7 +111,7 @@ const getCompanyJobs = async (req, res) => {
       });
 
       const company = await prisma.company.findUnique({
-        where: {id: parseInt(companyId)}
+        where: {id: companyId}
       });
       const application = await prisma.application.findUnique({
         where: {id: parseInt(applicationId)}
@@ -125,9 +130,7 @@ const getCompanyJobs = async (req, res) => {
       // Récupérer les offres publiées par ce recruteur
       const applicationStatus = await prisma.application.update({
         where: { id:application.id },
-        data:{
-            status
-        },
+        data:{ status },
         select:{status:true}
       });
   

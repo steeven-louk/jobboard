@@ -3,61 +3,141 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"  // Ou PostgreSQL, MySQL selon ton choix
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id          String      @id @default(cuid())
-  email       String   @unique
-  password    String
-  fullName    String
-  role        UserRole @default(USER)
-  sexe        Sexe @default(Homme)
-  phone       String
-  city        String
-  domaine     String?
-  picture     String?
-  birthdate   DateTime
-  jobs        Job[]    @relation("UserJobs")
+  id           String         @id @default(cuid())
+  email        String         @unique
+  password     String
+  fullName     String
+  role         UserRole       @default(USER)
+  sexe         Sexe           @default(Homme)
+  phone        String
+  city         String
+  domaine      String?
+  picture      String?
+  birthdate    DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   applications Application[]
-  payments    Payment[]
-  company     Company? // Uniquement pour les recruteurs
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  company      Company?
+  Experience   Experience[]   @relation("UserJobs")
+  Favoris      Favoris[]
+  Diplome      Formation[]    @relation("UserJobs")
+  jobs         Job[]          @relation("UserJobs")
+  payments     Payment[]
   Subscription Subscription[]
-  Experience Experience[] @relation("UserJobs")
-  Diplome Formation[] @relation("UserJobs")
-  Favoris Favoris[]
 }
 
 model Experience {
-  id            Int   @id @default(autoincrement())
-  title         String
-  entreprise    String
-  location      String
-  contract      JobType
-  date          String
-  en_cours      Boolean @default(false)
-  description   String?
-  competence    String?
-  userId        String
-  user          User      @relation("UserJobs", fields: [userId], references: [id])
+  id          Int     @id @default(autoincrement())
+  title       String
+  entreprise  String
+  location    String
+  contract    JobType
+  date        String
+  en_cours    Boolean @default(false)
+  description String?
+  competence  String?
+  userId      String
+  user        User    @relation("UserJobs", fields: [userId], references: [id])
 }
 
 model Formation {
-  id            Int   @id @default(autoincrement())
-  title         String
-  level         String
-  school        String
-  location      String
-  date          String
-  description   String?
-  competence    String?
-  userId        String
-  user          User      @relation("UserJobs", fields: [userId], references: [id])
+  id          Int     @id @default(autoincrement())
+  title       String
+  level       String
+  school      String
+  location    String
+  // date-debut date-fin
+  date        String
+  description String?
+  competence  String?
+  userId      String
+  user        User    @relation("UserJobs", fields: [userId], references: [id])
+}
 
+model Job {
+  id              Int           @id @default(autoincrement())
+  title           String
+  description     String
+  skill           String
+  requirement     String
+  location        String
+  salary          Float?
+  duration        String?
+  jobType         JobType
+  isPremium       Boolean       @default(false)
+  userId          String
+  companyId       Int
+  expiration_date DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  applications    Application[]
+  Favoris         Favoris[]
+  company         Company       @relation(fields: [companyId], references: [id])
+  user            User          @relation("UserJobs", fields: [userId], references: [id])
+}
+
+model Company {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  location    String
+  website     String?
+  domaine     String?
+  logo        String?
+  userId      String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  jobs        Job[]
+}
+
+model Favoris {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  jobId     Int
+  createdAt DateTime @default(now())
+  job       Job      @relation(fields: [jobId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, jobId])
+}
+
+model Application {
+  id          Int               @id @default(autoincrement())
+  userId      String
+  jobId       Int
+  coverLetter String?
+  cv_url      String
+  status      ApplicationStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  job         Job               @relation(fields: [jobId], references: [id])
+  user        User              @relation(fields: [userId], references: [id])
+
+  @@unique([userId, jobId])
+}
+
+model Subscription {
+  id        Int                @id @default(autoincrement())
+  userId    String
+  plan      SubscriptionPlan
+  startDate DateTime
+  endDate   DateTime
+  status    SubscriptionStatus @default(ACTIVE)
+  user      User               @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id          Int           @id @default(autoincrement())
+  userId      String
+  amount      Float
+  status      PaymentStatus @default(PENDING)
+  paymentDate DateTime      @default(now())
+  user        User          @relation(fields: [userId], references: [id])
 }
 
 enum Sexe {
@@ -71,81 +151,15 @@ enum UserRole {
   ADMIN
 }
 
-model Job {
-  id          Int       @id @default(autoincrement())
-  title       String
-  description String
-  skill       String
-  requirement String
-  location    String
-  salary      Float?
-  duration    String?
-  jobType     JobType
-  isPremium   Boolean   @default(false)
-  userId      String
-  companyId   Int       // Ajout de l'entreprise
-  user        User      @relation("UserJobs", fields: [userId], references: [id])
-  company     Company   @relation(fields: [companyId], references: [id])
-  applications Application[]
-  expiration_date  DateTime
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  Favoris Favoris[]
-}
-
-
-model Company {
-  id          Int    @id @default(autoincrement())
-  name        String @unique
-  description String?
-  location    String
-  website     String?
-  logo        String?
-  userId      String    @unique
-  user        User   @relation(fields: [userId], references: [id])
-
-  jobs        Job[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Favoris {
-  id            Int   @id @default(autoincrement())
-  userId        String
-  jobId         Int
-  user          User      @relation(fields: [userId], references: [id])
-  job           Job       @relation(fields: [jobId], references: [id])  
-  createdAt   DateTime  @default(now())
-  @@unique([userId,jobId])
-
-}
-
 enum JobType {
-  FULL_TIME
-  PART_TIME
-  CONTRACT
+  // FULL_TIME
+  // PART_TIME
+  // CONTRACT
   FREELANCE
   CDI
   CDD
   STAGE
   INTERIM
-  
-}
-
-model Application {
-  id          Int       @id @default(autoincrement())
-  userId      String
-  jobId       Int
-  coverLetter String?
-  cv_url          String
-  status      ApplicationStatus @default(PENDING)
-  user        User      @relation(fields: [userId], references: [id])
-  job         Job       @relation(fields: [jobId], references: [id])
-  createdAt   DateTime  @default(now())
-  // @@id(name: "applicationId", [userId,jobId])
-  @@unique([userId,jobId])
-  
 }
 
 enum ApplicationStatus {
@@ -154,16 +168,6 @@ enum ApplicationStatus {
   REJECTED
 }
 
-model Subscription {
-  id          Int       @id @default(autoincrement())
-  userId      String
-  plan        SubscriptionPlan
-  startDate   DateTime
-  endDate     DateTime
-  status      SubscriptionStatus @default(ACTIVE)
-  user        User      @relation(fields: [userId], references: [id])
-}
-// JobboardDatabase2025
 enum SubscriptionPlan {
   BASIC
   PRO
@@ -174,15 +178,6 @@ enum SubscriptionStatus {
   ACTIVE
   EXPIRED
   CANCELLED
-}
-
-model Payment {
-  id          Int       @id @default(autoincrement())
-  userId      String
-  amount      Float
-  status      PaymentStatus @default(PENDING)
-  paymentDate DateTime      @default(now())
-  user        User      @relation(fields: [userId], references: [id])
 }
 
 enum PaymentStatus {

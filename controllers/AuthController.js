@@ -66,7 +66,15 @@ const Login = async (req, res) => {
             { expiresIn: '3d' }
         );
 
-        return res.status(200).json({ message: "Connexion réussie", token, username: user.fullName });
+        return res.status(200).json({ message: "Connexion réussie", token, 
+            user: {
+                id: user.id,
+                fullName: user.fullName,
+                email: user.email,
+                role: user.role,
+                companyId: user.company?.id || null
+            }
+         });
     } catch (error) {
         console.error("Erreur lors de la connexion:", error);
         return res.status(500).json({ message: "Erreur interne du serveur" });

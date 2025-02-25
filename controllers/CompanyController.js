@@ -2,6 +2,48 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+const getCompanies = async (_, res) => {
+
+  try {
+
+    const companies = await prisma.company.findMany({
+      select:{
+        id:true,
+        name:true,
+        logo:true,
+        location:true
+      }
+    });
+
+    return res.status(200).json({companies});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des offres.",error:error });
+  }
+};
+
+const getCompanyDetail = async (req, res) => {
+  const {id} = await req.params;
+  // console.log(role)
+  try {
+
+   
+    const company = await prisma.company.findUnique({
+      where :{ id:parseInt(id)},
+      include:{jobs:true}
+    });
+
+    if(!company){
+      return res.status(404).json({message:"company introuvable"});
+    }
+
+    return res.status(200).json({company});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des offres.",error:error });
+  }
+};
+
 const getCompanyJobs = async (req, res) => {
     const companyId = await req.user.companyId;
     // console.log("rre", req.user.companyId)
@@ -142,5 +184,5 @@ const getCompanyJobs = async (req, res) => {
   };
   
   
-  module.exports = { getCompanyJobs, getApplyJobs, updateApplicationStatus };
+  module.exports = { getCompanyJobs, getApplyJobs, updateApplicationStatus, getCompanies, getCompanyDetail };
   

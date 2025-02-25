@@ -163,7 +163,7 @@ model Subscription {
   status      SubscriptionStatus @default(ACTIVE)
   user        User      @relation(fields: [userId], references: [id])
 }
-
+// JobboardDatabase2025
 enum SubscriptionPlan {
   BASIC
   PRO

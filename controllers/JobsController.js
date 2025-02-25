@@ -66,7 +66,7 @@ const addJob = async (req, res) => {
                 skill,
                 requirement,
                 location,
-                salary,
+                salary:parseInt(salary),
                 duration,
                 jobType,
                 expiration_date: new Date(expiration_date),

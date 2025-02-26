@@ -11,7 +11,8 @@ const getCompanies = async (_, res) => {
         id:true,
         name:true,
         logo:true,
-        location:true
+        location:true,
+        domaine:true
       }
     });
 

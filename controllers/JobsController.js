@@ -138,14 +138,14 @@ const addToFavorie = async (req, res) => {
 
         if (isExist) {
             await prisma.favoris.delete({
-                where: {
+                where: { id:isExist.id,
                     userId_jobId: {
                         jobId: jobIdInt,
                         userId: req.user.id
                     }
                 }
             });
-            return res.status(200).json({ message: "Offre supprimée des favoris" });
+            return res.status(200).json({ message: "Offre supprimée des favoris", isFavorite:false });
         }
 
         await prisma.favoris.create({
@@ -155,7 +155,7 @@ const addToFavorie = async (req, res) => {
             }
         });
 
-        return res.status(201).json({ message: "Offre ajoutée aux favoris" });
+        return res.status(201).json({ message: "Offre ajoutée aux favoris", isFavorite:true });
     } catch (error) {
         console.error("Erreur serveur :", error);
         return res.status(500).json({ error: "Erreur serveur" });
@@ -181,4 +181,21 @@ const getFavoris = async (req, res) => {
     }
 };
 
-module.exports = { getJobs, getJob, addJob, updateJob, deleteJobs, addToFavorie, getFavoris };
+
+const isInFavorite = async (req, res) => {
+    const { jobId } = req.query;
+    const userId = req.user.id;
+  
+    try {
+      const existingFavorite = await prisma.favoris.findFirst({
+        where: { userId:String(userId), jobId: parseInt(jobId)},
+      });
+  
+      return res.json({ isFavorite: !!existingFavorite });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Erreur lors de la verification du favoris" });
+    }
+  };
+
+module.exports = { getJobs, getJob, addJob, updateJob, deleteJobs, addToFavorie, getFavoris,isInFavorite };

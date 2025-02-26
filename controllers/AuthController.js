@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const prisma = new PrismaClient();
 
 const Register = async (req, res) => {
-    const { email, password, fullName, phone, city } = req.body;
+    const { email, password, fullName, phone, city, birthdate } = req.body;
     const saltRounds = 10;
 
     try {

@@ -1,6 +1,6 @@
 const express = require('express');
 const { verifyToken, verifyRole } = require('../middlewares/auth');
-const { getJobs, addJob, updateJob, deleteJobs, getJob, addToFavorie, getFavoris } = require('../controllers/JobsController');
+const { getJobs, addJob, updateJob, deleteJobs, getJob, addToFavorie, getFavoris, isInFavorite } = require('../controllers/JobsController');
 
 const job_Route = express.Router();
 
@@ -12,6 +12,7 @@ job_Route.delete('/delete_job/:id',verifyToken,verifyRole(['ADMIN','RECRUITER'])
 
 job_Route.post('/job/add_favorie/:jobId',verifyToken, addToFavorie);
 job_Route.get('/user/favories',verifyToken,getFavoris);
+job_Route.get('/user/favories/check',verifyToken,isInFavorite);
 
 
 module.exports = job_Route;

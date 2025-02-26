@@ -45,6 +45,55 @@ const getCompanyDetail = async (req, res) => {
   }
 };
 
+const updateCompany = async (req, res) => {
+  const { name, description,location,website,domaine,logo} = await req.body;
+  const {id} = await req.params;
+  const companyId = await req.user.companyId;
+  const userId = await req.user.id
+
+  try {
+    if(companyId !== parseInt(id)){
+      return res.status(403).json({message:"company introuvable"});
+    }
+  
+    // Vérifier si l'utilisateur est un recruteur
+    const user = await prisma.user.findUnique({
+      where: { id: userId, role:"RECRUITER" },
+      include: { company: true },
+    });
+   
+    const company_exist = await prisma.company.findUnique({
+      where :{ id:parseInt(id)}, // include:{jobs:true}
+    });
+
+    if (!user || user.role !== "RECRUITER") {
+      return res.status(403).json({ message: "Seuls les recruteurs peuvent mettre à jours une company." });
+    }
+
+    if(!company_exist){
+      return res.status(404).json({message:"company introuvable"});
+    }
+
+    const company = await prisma.company.update({
+      where:{id:company_exist.id},
+      data:{
+        name,
+        description,
+        location,
+        website,
+        domaine,
+        logo,
+        userId:user.id
+      }
+    })
+
+    return res.status(200).json({message:"company mise à jour avec succes",company});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des offres.",error:error });
+  }
+};
+
 const getCompanyJobs = async (req, res) => {
     const companyId = await req.user.companyId;
     // console.log("rre", req.user.companyId)
@@ -185,5 +234,5 @@ const getCompanyJobs = async (req, res) => {
   };
   
   
-  module.exports = { getCompanyJobs, getApplyJobs, updateApplicationStatus, getCompanies, getCompanyDetail };
+  module.exports = { getCompanyJobs, getApplyJobs, updateApplicationStatus, getCompanies, getCompanyDetail, updateCompany };
   

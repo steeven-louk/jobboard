@@ -24,7 +24,7 @@ const getProfil =async(req,res)=>{
 }
 
 const updateProfile =async(req, res)=>{
-    const {email,phone,sexe,fullName,birthdate,domaine} =await req.body
+    const {email,phone,sexe,fullName,birthdate,domaine,picture} =await req.body
     try {
         if(!req.user || !req.user.id){
             return res.status(401).json({message:"Utilisateur non authentifié"});
@@ -36,8 +36,9 @@ const updateProfile =async(req, res)=>{
                 phone,
                 sexe,
                 fullName,
-                birthdate,
-               domaine 
+                birthdate:new Date(birthdate),
+               domaine,
+               picture
             }
         });
         // await getProfil();

@@ -1,6 +1,6 @@
 const express = require("express");
 const { verifyToken, verifyRole } = require("../middlewares/auth");
-// const { uploadData } = require("../controllers/JobsController");
+
 const upload = require("../middlewares/upload");
 const { uploadData } = require("../controllers/UploadController");
 
@@ -12,5 +12,6 @@ uploadRoute.post("/:type/:userId",
     upload.single("file"), 
     uploadData
 );
+
 
 module.exports = uploadRoute;

@@ -5,8 +5,21 @@ const jwt = require("jsonwebtoken");
 const prisma = new PrismaClient();
 
 const Register = async (req, res) => {
-    const { email, password, fullName, phone, city, birthdate } = await req.body;
+    const { email, password, fullName, phone, city, birthdate, role } = await req.body;
     const saltRounds = 10;
+
+      // Calculer l'âge
+  const birthDateObj = new Date(birthdate);
+  const today = new Date();
+  const age = today.getFullYear() - birthDateObj.getFullYear() - (today < new Date(today.getFullYear(), birthDateObj.getMonth(), birthDateObj.getDate()) ? 1 : 0);
+
+  // Vérifier l'âge en fonction du rôle
+  if (role === "USER" && age < 15) {
+    return res.status(400).json({ message: "Vous devez avoir au moins 15 ans pour être candidat." });
+  }
+  if (role === "RECRUITER" && age < 18) {
+    return res.status(400).json({ message: "Vous devez avoir au moins 18 ans pour être recruteur." });
+  }
 
     try {
         if (!email || !password || !fullName || !phone || !city) {
@@ -30,8 +43,9 @@ const Register = async (req, res) => {
                 password: hashedPassword,
                 phone,
                 city,
-                picture:"lorem",
-                birthdate:new Date(birthdate)
+                picture:"",
+                birthdate:birthDateObj,
+                role
             }
         });
 

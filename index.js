@@ -10,6 +10,7 @@ const company_router = require("./routes/Company_routes");
 // const { createClient } = require("@supabase/supabase-js");
 // const multer = require("multer");
 const uploadRoute = require("./routes/UploadRoute");
+const webhookRouter = require("./routes/stripe/webhook");
 
 require('dotenv').config()
 
@@ -37,6 +38,7 @@ app.use('/api/auth',recruterRoute);
 app.use('/api', job_Route);
 app.use('/api/company', company_router);
 app.use('/api/upload', uploadRoute);
+app.use('/api/stripe', webhookRouter);
 
 
 const port = process.env.PORT || 5000;

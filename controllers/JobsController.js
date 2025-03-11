@@ -194,7 +194,7 @@ const isInFavorite = async (req, res) => {
       return res.json({ isFavorite: !!existingFavorite });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Erreur lors de la verification du favoris" });
+      return res.status(500).json({ message: "Erreur lors de la verification du favoris" ,error:error});
     }
   };
 

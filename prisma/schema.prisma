@@ -38,7 +38,9 @@ model Experience {
   entreprise  String
   location    String
   contract    JobType
-  date        String
+  // date        String
+  date_debut  DateTime?
+  date_fin    DateTime
   en_cours    Boolean @default(false)
   description String?
   competence  String?
@@ -52,8 +54,9 @@ model Formation {
   level       String
   school      String
   location    String
-  // date-debut date-fin
-  date        String
+  date_debut  DateTime?
+  date_fin    DateTime
+  // date        String
   description String?
   competence  String?
   userId      String
@@ -70,7 +73,8 @@ model Job {
   salary          Float?
   duration        String?
   jobType         JobType
-  isPremium       Boolean       @default(false)
+  // isPremium       Boolean       @default(false)
+  isPublished     Boolean       @default(false) // Ajout d’un champ pour savoir si l’annonce est active
   userId          String
   companyId       Int
   expiration_date DateTime
@@ -79,8 +83,33 @@ model Job {
   applications    Application[]
   Favoris         Favoris[]
   company         Company       @relation(fields: [companyId], references: [id])
+  // user            User          @relation(fields: [userId], references: [id])
   user            User          @relation("UserJobs", fields: [userId], references: [id])
+
+  Payment Payment[]
 }
+
+// model Job {
+//   id              Int           @id @default(autoincrement())
+//   title           String
+//   description     String
+//   skill           String
+//   requirement     String
+//   location        String
+//   salary          Float?
+//   duration        String?
+//   jobType         JobType
+//   isPremium       Boolean       @default(false)
+//   userId          String
+//   companyId       Int
+//   expiration_date DateTime
+//   createdAt       DateTime      @default(now())
+//   updatedAt       DateTime      @updatedAt
+//   applications    Application[]
+//   Favoris         Favoris[]
+//   company         Company       @relation(fields: [companyId], references: [id])
+//   user            User          @relation("UserJobs", fields: [userId], references: [id])
+// }
 
 model Company {
   id          Int      @id @default(autoincrement())
@@ -133,13 +162,25 @@ model Subscription {
 }
 
 model Payment {
-  id          Int           @id @default(autoincrement())
-  userId      String
-  amount      Float
-  status      PaymentStatus @default(PENDING)
-  paymentDate DateTime      @default(now())
-  user        User          @relation(fields: [userId], references: [id])
+  id             Int           @id @default(autoincrement())
+  userId         String
+  jobId          Int?
+  amount         Float
+  status         PaymentStatus @default(PENDING)
+  paymentDate    DateTime      @default(now())
+  stripeSessionId String?      @unique // Stocke l’ID Stripe
+  user           User          @relation(fields: [userId], references: [id])
+  job            Job?          @relation(fields: [jobId], references: [id])
 }
+
+// model Payment {
+//   id          Int           @id @default(autoincrement())
+//   userId      String
+//   amount      Float
+//   status      PaymentStatus @default(PENDING)
+//   paymentDate DateTime      @default(now())
+//   user        User          @relation(fields: [userId], references: [id])
+// }
 
 enum Sexe {
   Homme

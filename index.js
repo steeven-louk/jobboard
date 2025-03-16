@@ -66,7 +66,7 @@ app.use('/api/company', company_router);
 app.use('/api/upload', uploadRoute);
 app.use('/api/payment', paymentRouter);
 
-
+app.get("/", (req,_)=> req.send("server"))
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`))

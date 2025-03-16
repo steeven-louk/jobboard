@@ -12,18 +12,43 @@ const Webhook = async(req,res)=>{
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, enpointSecret);
     } catch (error) {
-        return res.status(400).json({message:`Webhook Error:${err.message}`});
+        return res.status(400).json({message:`Webhook Error:${error}`});
     }
 
+    
     if (event.type === "checkout.session.completed"){
         const session = event.data.object;
+        const userId = session.metadata.userId
         const jobData = JSON.parse(session.metadata.jobData);
-
-        // Créer l'annonce et la publier
-        const job = await prisma.job.create({
-            data: {...jobData, isPublished: true},
+   
+        const user = await prisma.user.findUnique({
+            where: {id:userId},
+            include: {company:true},
         });
 
+        if (!user) {
+            console.error("❌ Erreur : Utilisateur introuvable avec ID", userId);
+            return res.status(404).json({ message: "Utilisateur introuvable." });
+          }
+        
+        const job = await prisma.job.create({
+            data: {
+              title: jobData.title,
+              description: jobData.description,
+              skill: jobData.skill,
+              requirement: jobData.requirement,
+              location: jobData.location,
+              salary: parseInt(jobData.salary),
+              duration: jobData.duration,
+              jobType: jobData.jobType,
+              expiration_date: new Date(jobData.expiration_date),
+            //   isPremium: jobData.selectedOffer.id !== "BASIC",
+              isPublished: true,
+              userId: user.id,
+              companyId: user.company ? user.company.id : null,
+            },
+          });
+// console.log("jobbb", job);
         // Associer le paiement à l'annonce
         await prisma.payment.updateMany({
             where: { stripeSessionId: session.id},

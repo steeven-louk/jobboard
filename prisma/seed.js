@@ -1,11 +1,11 @@
 import { PrismaClient, Sexe, UserRole, JobType, ApplicationStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
-
+loadStrip
 async function main() {
   console.log("🚀 Début du seed...");
-
-  // 🧑‍💻 Création des utilisateurs (5 candidats et 2 recruteurs)
+  const hashedPassword ="$2b$10$iHm/do09eGLX5is/3klMte3B6w/mILYIA2/KzmlOVDw0oZa6XHvBu"
+  // 🧑‍💻 Création des utilisateurs (5 candidats et 2 recruteurs)w
   const users = await prisma.user.createMany({
     data: [
       { email: "john.doe@example.com", password: "hashedpassword", fullName: "John Doe", role: UserRole.USER, sexe: Sexe.Homme, phone: "0612345678", city: "Paris" },

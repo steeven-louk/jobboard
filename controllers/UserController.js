@@ -11,6 +11,9 @@ const getProfil =async(req,res)=>{
             include:{
                 Experience:true,
                 Diplome:true
+            },
+            omit: {
+                password: true
             }
         });
         if(!user){
@@ -59,7 +62,8 @@ const updateExperience =async(req, res)=>{
         entreprise,
         title,
         contract,
-        date,
+        date_debut,
+        date_fin,
         description,
         en_cours,
         competence} =await req.body;
@@ -84,7 +88,8 @@ const updateExperience =async(req, res)=>{
                 entreprise,
                 title,
                 contract,
-                date,
+                date_debut:new Date(date_debut),
+                date_fin:new Date(date_fin),
                 description,
                 en_cours,
                 competence, // Assure-toi d'envoyer une chaîne si c'est stocké en texte
@@ -104,7 +109,8 @@ const updateDiplome =async(req, res)=>{
         level,
         school,
         location,
-        date,
+        date_debut,
+        date_fin,
         description,
         competence} =await req.body;
     try {
@@ -128,7 +134,8 @@ const updateDiplome =async(req, res)=>{
                 level,
                 school,
                 location,
-                date,
+                date_debut:new Date(date_debut),
+                date_fin:new Date(date_fin),
                 description,
                 competence
             },
@@ -146,7 +153,8 @@ const addDiplome =async(req,res)=>{
         level,
         school,
         location,
-        date,
+        date_debut,
+        date_fin,
         description,
         competence} =await req.body;
     try {
@@ -165,7 +173,8 @@ const addDiplome =async(req,res)=>{
                 level,
                 school,
                 location,
-                date,
+                date_debut:new Date(date_debut),
+                date_fin:new Date(date_fin),
                 description,
                 competence // Assure-toi d'envoyer une chaîne si c'est stocké en texte
             },
@@ -205,7 +214,8 @@ const addExperience =async(req,res)=>{
         entreprise,
         title,
         contract,
-        date,
+        date_debut,
+        date_fin,
         description,
         en_cours,
         competence} =await req.body;
@@ -225,7 +235,8 @@ const addExperience =async(req,res)=>{
                 entreprise,
                 title,
                 contract,
-                date,
+                date_debut:new Date(date_debut),
+                date_fin:new Date(date_fin),
                 description,
                 en_cours,
                 competence, // Assure-toi d'envoyer une chaîne si c'est stocké en texte

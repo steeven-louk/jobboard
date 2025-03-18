@@ -6,8 +6,12 @@ const prisma = new PrismaClient();
 const getJobs = async (_, res) => {
     try {
         const jobs = await prisma.job.findMany({
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            include:{company:{
+                select:{domaine:true,logo:true}
+            }}
         });
+        
         return res.status(200).json({ jobs:jobs });
     } catch (error) {
         console.error("Erreur lors de la récupération des jobs :", error);
@@ -183,8 +187,8 @@ const getFavoris = async (req, res) => {
 
 
 const isInFavorite = async (req, res) => {
-    const { jobId } = req.query;
-    const userId = req.user.id;
+    const { jobId } = await req.query;
+    const userId = await req.user.id;
   
     try {
       const existingFavorite = await prisma.favoris.findFirst({

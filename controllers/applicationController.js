@@ -47,7 +47,7 @@ const getAllApplication = async (req, res) => {
 const sumbitApplication = async(req,res)=>{
     const {jobId} = req.params;
     const {coverLetter,cv_url} = req.body
-
+    const userId = req.user.id
 
     try {
         if (!jobId) {
@@ -59,10 +59,19 @@ const sumbitApplication = async(req,res)=>{
             return res.status(400).json({ message: "Tous les champs sont requis." });
         }
 
+        // Vérifier si l'utilisateur existe
+        const user = await prisma.user.findUnique({
+            where: {id:userId}
+        });
+
+        if(!user) {
+            return res.status(403).json({message:"Veuillez vous reconnectez pour postuler"});
+        }
+
         // Vérifier si l'utilisateur a déjà postulé
         const isExist = await prisma.application.findUnique({
             where: {
-                userId_jobId:{jobId:parseInt(jobId), userId:req.user.id}     
+                userId_jobId:{jobId:parseInt(jobId), userId:userId}     
             },
         });
 
@@ -74,7 +83,8 @@ const sumbitApplication = async(req,res)=>{
                     userId:req.user.id,
                     jobId:parseInt(jobId),
                     coverLetter,
-                    cv_url
+                    cv_url,
+                    user_profile: user?.picture
                 }
             });
             return res.status(201).json({

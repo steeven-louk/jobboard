@@ -7,7 +7,7 @@ const createRecruiter = async (req, res) => {
   try {
     const { 
       email, password, fullName, phone, city, birthdate, 
-      companyName, companyLocation, website, description 
+      companyName, companyLocation, website, description,employeeCount
     } = req.body;
 
     // Vérifier si tous les champs obligatoires sont remplis
@@ -48,6 +48,7 @@ const createRecruiter = async (req, res) => {
             location: companyLocation,
             website: website || null,
             description: description || null,
+            employeeCount:employeeCount || null
           },
         },
       },

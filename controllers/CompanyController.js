@@ -46,7 +46,7 @@ const getCompanyDetail = async (req, res) => {
 };
 
 const updateCompany = async (req, res) => {
-  const { name, description,location,website,domaine,logo} = await req.body;
+  const { name, description,location,website,domaine,logo,employeeCount} = await req.body;
   const {id} = await req.params;
   const companyId = await req.user.companyId;
   const userId = await req.user.id
@@ -83,6 +83,7 @@ const updateCompany = async (req, res) => {
         website,
         domaine,
         logo,
+        employeeCount,
         userId:user.id
       }
     })

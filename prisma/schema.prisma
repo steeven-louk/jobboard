@@ -119,12 +119,15 @@ model Company {
   website     String?
   domaine     String?
   logo        String?
+  employeeCount String?
   userId      String   @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   user        User     @relation(fields: [userId], references: [id])
   jobs        Job[]
 }
+
+
 
 model Favoris {
   id        Int      @id @default(autoincrement())

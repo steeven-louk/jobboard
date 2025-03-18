@@ -46,6 +46,8 @@ model Experience {
   competence  String?
   userId      String
   user        User    @relation("UserJobs", fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model Formation {
@@ -61,6 +63,8 @@ model Formation {
   competence  String?
   userId      String
   user        User    @relation("UserJobs", fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model Job {
@@ -87,6 +91,9 @@ model Job {
   user            User          @relation("UserJobs", fields: [userId], references: [id])
 
   Payment Payment[]
+
+  @@index([companyId])
+  @@index([userId])
 }
 
 // model Job {
@@ -138,6 +145,7 @@ model Favoris {
   user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, jobId])
+  @@index([jobId])
 }
 
 model Application {
@@ -152,6 +160,7 @@ model Application {
   user        User              @relation(fields: [userId], references: [id])
 
   @@unique([userId, jobId])
+  @@index([jobId])
 }
 
 model Subscription {

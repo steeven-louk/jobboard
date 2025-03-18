@@ -43,7 +43,45 @@ const getAllApplication = async (req, res) => {
 };
 
 
+const getApplication = async (req, res) => {
+    try {
+      // Vérifier que l'ID est bien fourni et convertible en nombre
+      if (!req.params.id || isNaN(Number(req.params.id))) {
+        return res.status(400).json({ message: "ID d'application invalide" });
+      }
+  
+      const applicationId = Number(req.params.id);
 
+      const application = await prisma.application.findUnique({
+        where: { id: applicationId },
+        include: { 
+           job:{
+                select:{
+                    title:true
+                }
+          },
+          user: {
+            select: {
+              fullName: true,
+              email: true,
+              picture: true,
+              phone: true
+            }
+          }
+        }
+      });
+  
+      if (!application) {
+        return res.status(404).json({ message: "Application non trouvée" });
+      }
+  
+      return res.status(200).json({ application });
+    } catch (error) {
+      console.error("❌ Erreur dans getApplication:", error);
+      return res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+  };
+  
 const sumbitApplication = async(req,res)=>{
     const {jobId} = req.params;
     const {coverLetter,cv_url} = req.body
@@ -111,4 +149,4 @@ const sumbitApplication = async(req,res)=>{
     }
 }
 
-module.exports = { sumbitApplication,getAllApplication };
+module.exports = { sumbitApplication,getAllApplication, getApplication };

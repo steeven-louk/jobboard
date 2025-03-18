@@ -91,7 +91,7 @@ const updateCompany = async (req, res) => {
     return res.status(200).json({message:"company mise à jour avec succes",company});
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur lors de la récupération des offres.",error:error });
+    res.status(500).json({ message: "Erreur lors de la mise à jour.",error:error });
   }
 };
 

@@ -122,7 +122,7 @@ const sumbitApplication = async(req,res)=>{
                     jobId:parseInt(jobId),
                     coverLetter,
                     cv_url,
-                    user_profile: user?.picture
+                    // user_profile: user?.picture
                 }
             });
             return res.status(201).json({

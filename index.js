@@ -21,11 +21,13 @@ require('dotenv').config()
 // Configurer Multer pour l'upload temporaire
 // const storage = multer.memoryStorage();
 // const upload = multer({ storage });
+const FRONTEND_URL = process.env.NODE_ENV === "production" ? process.env.PROD_FRONTEND_URL : process.env.FRONTEND_URL;
+const DATABASE_URL = process.env.NODE_ENV === "production" ? process.env.PROD_DATABASE_URL : process.env.DATABASE_URL;
 
 const app = express()
 // ✅ Configuration correcte de CORS
 const corsOptions = {
-   origin: process.env.FRONTEND_URL, // ✅ Autorise uniquement ton frontend
+   origin: FRONTEND_URL, // ✅ Autorise uniquement ton frontend
    methods: "GET,POST,PUT,DELETE,OPTIONS",
    allowedHeaders: "Content-Type, Authorization",
    credentials: true, // ✅ Permet les cookies & JWT
@@ -35,7 +37,7 @@ const corsOptions = {
  
  // ✅ Middleware pour forcer les bons headers CORS
  app.use((req, res, next) => {
-   res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+   res.header("Access-Control-Allow-Origin", FRONTEND_URL);
    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
    res.header("Access-Control-Allow-Credentials", "true");
@@ -47,8 +49,6 @@ const corsOptions = {
  });
 
  
-// app.use(express.urlencoded({ extended: true,limite : '10 Mo' }));
-// app.use(express.json()); 
 
 app.use('/api/stripe',express.raw({ type: "application/json" }), webhookRouter);
 app.use(express.json({ limit: "50mb" })); // Pour JSON
@@ -69,5 +69,5 @@ app.use('/api/payment', paymentRouter);
 app.use("/", (_,res)=> res.send("welcome to the server home page"))
 const port = process.env.PORT || 5000;
 
-app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`))
+app.listen(port, () => console.log(`Serveur lancé sur le port ${port}, base de donnée ${DATABASE_URL}`))
    .on('error', (err) => console.error("Erreur lors du démarrage du serveur:", err));

@@ -38,9 +38,7 @@ console.log("Envoi du fichier a Supabase...")
 
     // 🔹 Envoi à Supabase Storage
     const { data, error } = await supabase.storage.from("jobboard_media").upload(filePath, file.buffer,
-    //   {
-    //     headers: { "x-upsert": "false" }, // Réduit les en-têtes envoyés
-    // },
+   
      {
      contentType: file.mimetype, // Ajoute le type MIME pour éviter des erreurs
   cacheControl: "3600",

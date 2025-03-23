@@ -25,7 +25,7 @@ require('dotenv').config()
 const app = express()
 // ✅ Configuration correcte de CORS
 const corsOptions = {
-   origin: "http://localhost:3000", // ✅ Autorise uniquement ton frontend
+   origin: process.env.FRONTEND_URL, // ✅ Autorise uniquement ton frontend
    methods: "GET,POST,PUT,DELETE,OPTIONS",
    allowedHeaders: "Content-Type, Authorization",
    credentials: true, // ✅ Permet les cookies & JWT
@@ -35,7 +35,7 @@ const corsOptions = {
  
  // ✅ Middleware pour forcer les bons headers CORS
  app.use((req, res, next) => {
-   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+   res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
    res.header("Access-Control-Allow-Credentials", "true");

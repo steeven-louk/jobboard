@@ -7,9 +7,12 @@ const getJobs = async (_, res) => {
     try {
         const jobs = await prisma.job.findMany({
             orderBy: { createdAt: 'desc' },
-            include:{company:{
-                select:{domaine:true,logo:true}
-            }}
+            include:{
+                    company:{
+                        select:{domaine:true,logo:true}
+                    },
+                    Payment:true
+        }
         });
         
         return res.status(200).json({ jobs:jobs });

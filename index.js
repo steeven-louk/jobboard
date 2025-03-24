@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
@@ -13,7 +14,6 @@ const uploadRoute = require("./routes/UploadRoute");
 const webhookRouter = require("./routes/stripe/webhook");
 const paymentRouter = require("./routes/stripe/paymentRoutes");
 
-require('dotenv').config()
 
 // Configuration de Supabase
 // const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
@@ -32,6 +32,7 @@ const corsOptions = {
    allowedHeaders: "Content-Type, Authorization",
    credentials: true, // ✅ Permet les cookies & JWT
  };
+
  
  app.use(cors(corsOptions));
  
@@ -69,5 +70,5 @@ app.use('/api/payment', paymentRouter);
 app.use("/", (_,res)=> res.send("welcome to the server home page"))
 const port = process.env.PORT || 5000;
 
-app.listen(port, () => console.log(`Serveur lancé sur le port ${port}, base de donnée ${DATABASE_URL}`))
+app.listen(port, () => console.log(`Serveur lancé sur le port ${port}, ${process.env.NODE_ENV}`))
    .on('error', (err) => console.error("Erreur lors du démarrage du serveur:", err));

@@ -70,5 +70,5 @@ app.use('/api/payment', paymentRouter);
 app.use("/", (_,res)=> res.send("welcome to the server home page"))
 const port = process.env.PORT || 5000;
 
-app.listen(port, () => console.log(`Serveur lancé sur le port ${port}, ${process.env.NODE_ENV}`))
+app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`))
    .on('error', (err) => console.error("Erreur lors du démarrage du serveur:", err));

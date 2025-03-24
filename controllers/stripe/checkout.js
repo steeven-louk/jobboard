@@ -29,9 +29,9 @@ const CheckoutPage =async(req, res)=>{
                 },
             ],
             mode: "payment",
-            success_url:`${process.env.FRONTEND_URL}/jobs`,
+            success_url:`${process.env.FRONTEND_URL || process.env.PROD_FRONTEND_URL}/jobs`,
             // success_url:`${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.FRONTEND_URL}/jobs`,
+            cancel_url: `${process.env.FRONTEND_URL || process.env.PROD_FRONTEND_URL}/jobs`,
             metadata: {userId: userId, jobData:JSON.stringify(jobData) },
         });
 

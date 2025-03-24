@@ -42,7 +42,6 @@ const Webhook = async(req,res)=>{
               duration: jobData.duration,
               jobType: jobData.jobType,
               expiration_date: new Date(jobData.expiration_date),
-            //   isPremium: jobData.selectedOffer.id !== "BASIC",
               isPublished: true,
               userId: user.id,
               companyId: user.company ? user.company.id : null,

@@ -25,13 +25,13 @@ const getCompanies = async (_, res) => {
 
 const getCompanyDetail = async (req, res) => {
   const {id} = await req.params;
-  // console.log(role)
+
   try {
 
    
     const company = await prisma.company.findUnique({
       where :{ id:parseInt(id)},
-      include:{jobs:true}
+      include:{jobs:true,company:true}
     });
 
     if(!company){
@@ -120,11 +120,11 @@ const getCompanyJobs = async (req, res) => {
   
       // Récupérer les offres publiées par ce recruteur
       const jobs = await prisma.job.findMany({
-        where: { companyId:companyId }
-        // include: {
-        //   applications: true, // Inclure les candidatures reçues pour chaque offre
-        //   company:true
-        // },
+        where: { companyId:companyId },
+        include: {
+          // applications: true, // Inclure les candidatures reçues pour chaque offre
+          company:true
+        },
       });
   
       return res.status(200).json({jobs});

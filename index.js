@@ -48,7 +48,6 @@ const corsOptions = {
    next();
  });
 
- 
 
 app.use('/api/stripe',express.raw({ type: "application/json" }), webhookRouter);
 app.use(express.json({ limit: "50mb" })); // Pour JSON

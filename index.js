@@ -22,7 +22,6 @@ const paymentRouter = require("./routes/stripe/paymentRoutes");
 // const storage = multer.memoryStorage();
 // const upload = multer({ storage });
 const FRONTEND_URL = process.env.NODE_ENV === "production" ? process.env.PROD_FRONTEND_URL : process.env.FRONTEND_URL;
-const DATABASE_URL = process.env.NODE_ENV === "production" ? process.env.PROD_DATABASE_URL : process.env.DATABASE_URL;
 
 const app = express()
 // ✅ Configuration correcte de CORS

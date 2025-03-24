@@ -12,7 +12,8 @@ const getCompanies = async (_, res) => {
         name:true,
         logo:true,
         location:true,
-        domaine:true
+        domaine:true,
+        employeeCount:true
       }
     });
 
@@ -31,7 +32,7 @@ const getCompanyDetail = async (req, res) => {
    
     const company = await prisma.company.findUnique({
       where :{ id:parseInt(id)},
-      include:{jobs:true,company:true}
+      include:{jobs:true}
     });
 
     if(!company){

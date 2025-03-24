@@ -8,19 +8,12 @@ const application_Route = require("./routes/Application_routes");
 const userRouter = require("./routes/User_routes");
 const recruterRoute = require("./routes/RecruiterRoutes");
 const company_router = require("./routes/Company_routes");
-// const { createClient } = require("@supabase/supabase-js");
-// const multer = require("multer");
+
 const uploadRoute = require("./routes/UploadRoute");
 const webhookRouter = require("./routes/stripe/webhook");
 const paymentRouter = require("./routes/stripe/paymentRoutes");
 
 
-// Configuration de Supabase
-// const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-// Configurer Multer pour l'upload temporaire
-// const storage = multer.memoryStorage();
-// const upload = multer({ storage });
 const FRONTEND_URL = process.env.NODE_ENV === "production" ? process.env.PROD_FRONTEND_URL : process.env.FRONTEND_URL;
 
 const app = express()
@@ -50,7 +43,7 @@ const corsOptions = {
 
 
 app.use('/api/stripe',express.raw({ type: "application/json" }), webhookRouter);
-app.use(express.json({ limit: "50mb" })); // Pour JSON
+app.use(express.json({ limit: "50mb" })); 
 app.use(express.urlencoded({ limit: "50mb", extended: true })); 
 
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -68,5 +61,5 @@ app.use('/api/payment', paymentRouter);
 app.use("/", (_,res)=> res.send("welcome to the server home page"))
 const port = process.env.PORT || 5000;
 
-app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`))
+app.listen(port, () => console.log(`Serveur lancé sur le port ${port}, ${FRONTEND_URL}`))
    .on('error', (err) => console.error("Erreur lors du démarrage du serveur:", err));

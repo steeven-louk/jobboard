@@ -65,12 +65,78 @@ app.use((err, req, res, next) => {
   // En développement, vous pouvez envoyer plus de détails pour faciliter le débogage.
   res.status(err.statusCode || 500).json({
     message: err.message || "Une erreur interne du serveur s'est produite.",
-    // Optionnel: n'envoyer le stack trace qu'en mode développement
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 });
 
+app.get('/health', (req, res) => {
+  console.log("✅ Health check requested.");
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(), // Temps d'exécution du processus en secondes
+    timestamp: new Date().toISOString()
+  });
+});
+
+// --- Gestion des Erreurs (Middleware de fin) ---
+// Ce middleware attrape toutes les erreurs non gérées par les routes précédentes.
+app.use((err, req, res, next) => {
+  console.error("❌ Erreur du serveur (middleware global) :", err.stack);
+
+  res.status(err.statusCode || 500).json({
+    message: err.message || "Une erreur interne du serveur s'est produite.",
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
+
+// --- Gestion des erreurs non capturées (Unhandled Rejections & Uncaught Exceptions) ---
+// Ces gestionnaires sont CRUCIAUX pour déboguer les arrêts inattendus de l'application.
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Erreur : Unhandled Rejection at:', promise, 'reason:', reason);
+  // Arrêter l'application de manière forcée après avoir loggué l'erreur
+  // En production, vous pourriez vouloir envoyer une alerte et laisser le processus se terminer
+  // pour que le gestionnaire de processus (comme Railway) le redémarre.
+  process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('❌ Erreur : Uncaught Exception at:', err);
+  // Arrêter l'application de manière forcée
+  process.exit(1);
+});
+
+// --- Démarrage du Serveur ---
 const port = process.env.PORT || 5000;
 
-app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`))
-   .on('error', (err) => console.error("Erreur lors du démarrage du serveur:", err));
+const server = app.listen(port, () => {
+  console.log(`🚀 Serveur lancé sur le port ${port} en mode ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Frontend URL autorisé: ${FRONTEND_URL}`);
+}).on('error', (err) => {
+  console.error("❌ Erreur lors du démarrage du serveur:", err);
+  process.exit(1); // Arrête le processus en cas d'erreur de démarrage
+});
+
+// --- Déconnexion propre de Prisma lors de l'arrêt du serveur ---
+const gracefulShutdown = async () => {
+  console.log("👋 Signal de terminaison reçu. Fermeture du serveur et déconnexion de Prisma...");
+  server.close(async () => {
+    console.log("🛑 Serveur Express fermé.");
+    await prisma.$disconnect();
+    console.log("✅ Prisma déconnecté.");
+    process.exit(0);
+  });
+
+  // Forcer l'arrêt si la fermeture prend trop de temps
+  setTimeout(() => {
+    console.error("❌ Fermeture forcée : Le serveur n'a pas pu se fermer proprement.");
+    process.exit(1);
+  }, 10000); // 10 secondes de délai
+};
+
+process.on('SIGTERM', gracefulShutdown); // Gère le signal SIGTERM (utilisé par Railway pour arrêter les conteneurs)
+process.on('SIGINT', gracefulShutdown);  // Gère Ctrl+C
+
+// const port = process.env.PORT || 5000;
+
+// app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`))
+//    .on('error', (err) => console.error("Erreur lors du démarrage du serveur:", err));

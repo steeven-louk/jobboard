@@ -58,6 +58,17 @@ app.use('/api/company', company_router);
 app.use('/api/upload', uploadRoute);
 app.use('/api/payment', paymentRouter);
 
+app.use((err, req, res, next) => {
+  console.error("❌ Erreur du serveur :", err.stack); // Log l'erreur complète pour le débogage
+
+  // Envoie une réponse d'erreur générique au client en production pour des raisons de sécurité
+  // En développement, vous pouvez envoyer plus de détails pour faciliter le débogage.
+  res.status(err.statusCode || 500).json({
+    message: err.message || "Une erreur interne du serveur s'est produite.",
+    // Optionnel: n'envoyer le stack trace qu'en mode développement
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
 
 const port = process.env.PORT || 5000;
 

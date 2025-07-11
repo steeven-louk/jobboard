@@ -1,6 +1,6 @@
 const express = require("express");
 const { verifyToken } = require("../middlewares/auth");
-const { getProfil, updateProfile, updateExperience, updateDiplome, addExperience, deleteExperience, addDiplome } = require("../controllers/UserController");
+const { getProfil, updateProfile, updateExperience, updateDiplome, addExperience, deleteExperience, addDiplome, deleteDiplome } = require("../controllers/UserController");
 
 const userRouter = express.Router();
 
@@ -12,8 +12,7 @@ userRouter.delete("/profil/experience/:id",verifyToken,deleteExperience);
 
 userRouter.put("/profil/diplome/:id",verifyToken,updateDiplome);
 userRouter.post("/profil/diplome",verifyToken,addDiplome);
-userRouter.delete("/profil/diplome/:id",verifyToken,deleteExperience);
+userRouter.delete("/profil/diplome/:id",verifyToken,deleteDiplome);
 
-// userRouter.post("/register", Register);
 
 module.exports = userRouter;

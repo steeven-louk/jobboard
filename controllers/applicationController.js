@@ -40,6 +40,9 @@ const getAllApplication = async (req, res) => {
             }
         });
 
+        if(!applications){
+            return;
+        }
         return res.status(200).json({ applications });
     } catch (error) {
         console.error("Erreur lors de la récupération des applications :", error);
@@ -57,8 +60,9 @@ const getApplication = async (req, res) => {
       if (!req.params.id || isNaN(Number(req.params.id))) {
         return res.status(400).json({ message: "ID d'application invalide" });
       }
-  
+      
       const applicationId = Number(req.params.id);
+
       const userIdFromToken = req.user.id;
       const userRole = req.user.role;
       const companyIdFromToken = req.user.companyId;
@@ -69,7 +73,12 @@ const getApplication = async (req, res) => {
            job:{
                 select:{
                     id: true,
-                    title:true
+                    title:true,
+                    company:{
+                        select:{
+                            id: true
+                        }
+                    }
                 }
           },
           user: {
@@ -81,11 +90,9 @@ const getApplication = async (req, res) => {
               phone: true
             }
           },
-          coverLetter: true,
-          cv_url: true
         }
       });
-  
+
       if (!application) {
         return res.status(404).json({ message: "Candidature non trouvée" });
       }
@@ -95,13 +102,13 @@ const getApplication = async (req, res) => {
         const isApplicant = application.user.id === userIdFromToken;
         const isJobOwnerRecruiter = userRole === "RECRUITER" &&
                                     application.job &&
-                                    application.job.companyId === companyIdFromToken;
+                                    application.job.company?.id === companyIdFromToken;
 
         if (!isApplicant && !isJobOwnerRecruiter) {
             return res.status(403).json({ message: "Accès non autorisé à cette candidature." });
         }
-  
-      return res.status(200).json({ application });
+
+        return res.status(200).json({ application });
     } catch (error) {
       console.error("❌ Erreur dans getApplication:", error);
       return res.status(500).json({  

@@ -242,8 +242,8 @@ const getCompanyJobs = async (req, res) => {
   };
 
   const updateApplicationStatus = async (req, res) => {
-    const { id: applicationId } = req.params; // Renommé pour la clarté
-    const { status: newStatus } = req.body; // Renommé pour la clarté
+    const { applicationId } = req.params;
+    const { status: newStatus } = req.body;
     const companyIdFromToken = req.user.companyId;
     const userIdFromToken = req.user.id;
 

@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 
 // Récupérer toutes les offres d'emploi
 const getJobs = async (_, res) => {
+
     try {
         const jobs = await prisma.job.findMany({
             orderBy: { createdAt: 'desc' },
@@ -14,7 +15,8 @@ const getJobs = async (_, res) => {
                     Payment:true
         }
         });
-        
+        console.log("jobssss")
+
         return res.status(200).json({ jobs:jobs });
     } catch (error) {
         console.error("❌ Erreur lors de la récupération des offres d'emploi :", error);

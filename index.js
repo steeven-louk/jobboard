@@ -106,15 +106,13 @@ process.on('uncaughtException', (err) => {
 });
 
 // --- Démarrage du Serveur ---
+
 const port = process.env.PORT || 5000;
 
 const server = app.listen(port, () => {
-  console.log(`🚀 Serveur lancé sur le port ${port} en mode ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Frontend URL autorisé: ${FRONTEND_URL}`);
-}).on('error', (err) => {
-  console.error("❌ Erreur lors du démarrage du serveur:", err);
-  process.exit(1); // Arrête le processus en cas d'erreur de démarrage
+  console.log(`🚀 Serveur lancé sur le port ${port}`);
 });
+
 
 // --- Déconnexion propre de Prisma lors de l'arrêt du serveur ---
 const gracefulShutdown = async () => {

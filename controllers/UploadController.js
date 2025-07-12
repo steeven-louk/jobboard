@@ -191,7 +191,7 @@ const uploadData = async (req, res) => {
         console.log("Fichier envoyé à Supabase avec succès. Données:", data);
 
         // --- Génération de l'URL publique du fichier ---
-        // const fileUrl  = `${process.env.SUPABASE_URL}/storage/v1/object/public/jobboard_media/${filePath}`;
+        // const fileUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/jobboard_media/${filePath}`;
         console.log("URL publique du fichier:", fileUrl);
 
         // --- Sauvegarde de l'URL dans la base de données PostgreSQL (via Prisma) ---

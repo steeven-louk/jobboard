@@ -54,19 +54,7 @@ const Register = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        // const newUser = await prisma.user.create({
-        //     data: {
-        //         fullName,
-        //         email,
-        //         password: hashedPassword,
-        //         phone,
-        //         city,
-        //         picture:"",
-        //         birthdate:birthDateObj,
-        //         role
-        //     }
-        // });
+        // --- Création de l'utilisateur ---
          let newUser;
         if (role === "RECRUITER") {
             // Création de l'entreprise et de l'utilisateur recruteur

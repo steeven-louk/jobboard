@@ -1,52 +1,3 @@
-// const jwt = require('jsonwebtoken');
-// const { PrismaClient } = require("@prisma/client");
-
-// const prisma = new PrismaClient();
-// const JWT_SECRET = process.env.JWT_SECRET;
-
-// const verifyToken = async(req, res, next) => {
-//     const token = req.headers.authorization;
-
-//     if (!token) {
-//         return res.status(401).json({ message: "Accès refusé, token manquant" });
-//     }
-
-//     try {
-//         const decoded = jwt.decode(token.split(" ")[1], process.env.JWT_SECRET);
-//         req.user = decoded; // Attache l'utilisateur à req.user
-
-//           // Si l'utilisateur est un recruteur, récupérer l'ID de sa company
-//     if (req.user.role === "RECRUITER") {
-//         const recruiter = await prisma.user.findUnique({
-//           where: { id: decoded.id },
-//           select: { company:{select:{id:true}}}, // Récupère uniquement l'ID de la company
-//         });
-  
-//         if (recruiter) {
-//           req.user.companyId = recruiter.company.id;
-//         }
-//       }
-  
-//         next();
-//     } catch (error) {
-//         return res.status(403).json({ message: "Token invalide" });
-//     }
-// };
-
-// // module.exports = verifyToken;
-
-
-// const verifyRole =(roles)=>{
-//     return (req,res,next)=>{
-//         if(!roles.includes(req.user.role)){
-//             return res.status(403).json({error:'Non Authoriser'});
-//         }
-//         next();
-//     }
-// }
-
-// module.exports = {verifyRole, verifyToken}
-
 /**
  * @file middlewares/auth.js
  * @description Middlewares pour la vérification des tokens JWT et l'autorisation basée sur les rôles.
@@ -91,15 +42,11 @@ const verifyToken = async (req, res, next) => {
     }
 
     try {
-        // --- CORRECTION MAJEURE : Utilisation de jwt.verify() au lieu de jwt.decode() ---
         // jwt.verify() vérifie la signature du token et son expiration.
         // Si le token est invalide ou expiré, une erreur sera levée.
         const decoded = jwt.verify(token, JWT_SECRET);
 
         // Attache le payload décodé à l'objet `req.user`
-        // Assurez-vous que `decoded.id` correspond bien à la clé de l'ID utilisateur dans votre JWT payload.
-        // Par exemple, si votre payload est { userId: '...', role: '...' }, utilisez decoded.userId.
-        // Pour l'instant, nous supposons que c'est `decoded.id` comme dans votre code.
         req.user = decoded;
 
         // Si l'utilisateur est un recruteur, récupérer l'ID de sa company

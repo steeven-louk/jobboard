@@ -40,7 +40,9 @@ const getJob = async (req, res) => {
 
         const job = await prisma.job.findUnique({
             where: { id: jobId },
-            include: { company: true } // Inclure tous les détails de l'entreprise
+            include: { 
+                company: true,
+            } // Inclure tous les détails de l'entreprise
         });
 
         if (!job) {

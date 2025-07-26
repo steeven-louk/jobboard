@@ -38,13 +38,15 @@ const getCompanyDetail = async (req, res) => {
    
     const company = await prisma.company.findUnique({
       where :{ id: companyId},
-      include:{jobs:true}
+        select:{
+          jobs:true,
+          logo: true 
+      }
     });
 
     if(!company){
       return res.status(404).json({message:"Entreprise introuvable."});
     }
-
     return res.status(200).json({company});
   } catch (error) {
         console.error("❌ Erreur lors de la récupération des détails de l'entreprise :", error);
